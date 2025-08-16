@@ -1,0 +1,38 @@
+services:
+  apios:
+    build:
+      context: .
+      dockerfile: python-go/Dockerfile
+    container_name: apios
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    networks:
+      - apios-net
+    tty: true
+
+  mongodb:
+    image: mongo:6.0
+    container_name: apios-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - apios-net
+
+  sqlite:
+    image: nouchka/sqlite3
+    container_name: apios-sqlite
+    volumes:
+      - ./sqlite_data:/data
+    networks:
+      - apios-net
+
+networks:
+  apios-net:
+
+volumes:
+  mongo_data:
+  sqlite_data:
+
