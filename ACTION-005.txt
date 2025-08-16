@@ -1,0 +1,10 @@
+Goal: Implement the user interaction daemon and basic dashboard.
+
+Instructions:
+- Python daemon that receives user input (CLI or WebSocket terminal) and routes it to the linguistic analysis daemon.
+- Return responses and object updates to the user.
+- Dashboard monitors running daemons via UNIX sockets, displays system status, and shows current nouns/adjectives/verbs.
+- Minimalistic dashboard (terminal-based UI using curses or textual frameworks).
+- Output full Python code and instructions for running both daemon and dashboard in Docker environment.
+
+Version: v0.1.005
