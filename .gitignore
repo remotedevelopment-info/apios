@@ -1,0 +1,11 @@
+# Ignore local SQLite database and other generated data
+/data/*.db
+/data/*.sqlite
+/data/*.sqlite3
+
+# Python
+__pycache__/
+*.pyc
+
+# VSCode
+.vscode/

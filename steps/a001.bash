@@ -56,7 +56,7 @@ docker exec -i apios bash -c 'mkdir -p /data' >/dev/null 2>&1
 
 echo "Step 5: Initialize SQLite database"
 docker exec -i apios bash -c "\
-sqlite3 /data/apios_local.sqlite <<'SQL'
+sqlite3 /data/apios.db <<'SQL'
 CREATE TABLE IF NOT EXISTS linguistic_objects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     noun TEXT,
@@ -81,7 +81,7 @@ SQL
 
 echo "Step 6: Verify SQLite tables"
 docker exec -i apios bash -c \
-"sqlite3 /data/apios_local.sqlite \"SELECT name FROM sqlite_master WHERE type='table';\""
+"sqlite3 /data/apios.db \"SELECT name FROM sqlite_master WHERE type='table';\""
 
 echo "ApiOS environment initialized successfully!"
 

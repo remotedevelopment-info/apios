@@ -31,7 +31,7 @@ PYTHON
 
 echo "Step 4: Confirm agent record"
 docker exec -it apios bash -c "\
-sqlite3 /data/apios_local.sqlite \"SELECT name FROM sqlite_master WHERE type='table';\"
+sqlite3 /data/apios.db \"SELECT name FROM sqlite_master WHERE type='table';\"
 "
 
 echo "ACTION-002 completed successfully!"

@@ -6,17 +6,17 @@ echo "Step 3: Initialize SQLite schema"
 
 DB_FILE="/data/apios.db"
 
-# ensure sqlite3 is available
-if ! command -v sqlite3 >/dev/null 2>&1; then
-  echo "Error: sqlite3 is not installed or not in PATH"
+# ensure sqlite3 is available IN THE CONTAINER
+if ! docker exec apios bash -lc 'command -v sqlite3 >/dev/null 2>&1'; then
+  echo "Error: sqlite3 is not installed in the apios container"
   exit 1
 fi
 
-# ensure /data exists
+# ensure /data exists (host side ensures the bind mount path)
 mkdir -p ./data 
 
 # create tables (idempotent with IF NOT EXISTS)
-docker exec -it apios bash -c "sqlite3 \"$DB_FILE\" <<'SQL'
+docker exec -i apios bash -lc "sqlite3 \"$DB_FILE\" <<'SQL'
 CREATE TABLE IF NOT EXISTS linguistic_objects (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
