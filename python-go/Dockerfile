@@ -14,14 +14,9 @@ RUN apt-get update && \
         libsqlite3-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
-
-# Install Python packages
-RUN pip install --no-cache-dir pymongo fastapi uvicorn
-
-# Install sqlite3 in the apios-sqlite container
-RUN apt-get update && apt-get install -y sqlite3
+# Upgrade pip and install Python packages
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install --no-cache-dir pymongo fastapi uvicorn
 
 # Set working directory
 WORKDIR /src

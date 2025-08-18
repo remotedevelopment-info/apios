@@ -26,7 +26,9 @@ function check_sqlite() {
   fi
   if docker exec apios sqlite3 "$container_db" ".tables" | grep -q "linguistic_objects"; then
     echo "[OK] SQLite schema present"
-    $VERBOSE && docker exec apios sqlite3 "$container_db" ".schema"
+    if [[ "$VERBOSE" == true ]]; then
+      docker exec apios sqlite3 "$container_db" ".schema"
+    fi
   else
     echo "[FAIL] SQLite schema missing"
   fi
@@ -44,7 +46,9 @@ function check_storage() {
   local root="./data/objects"
   if [ -d "$root" ]; then
     echo "[OK] object storage directory exists"
-    $VERBOSE && find "$root" -maxdepth 2 -type d
+    if [[ "$VERBOSE" == true ]]; then
+      find "$root" -maxdepth 2 -type d
+    fi
   else
     echo "[FAIL] object storage directory missing"
   fi
