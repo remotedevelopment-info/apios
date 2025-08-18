@@ -1,0 +1,21 @@
+Goal: <high-level goal — what this action achieves>
+
+Instructions:
+- <human-readable guidance, constraints, design choices>
+- <why this step matters>
+- <dependencies to consider>
+- <what gets generated in steps/>
+
+ACTION-000: <short descriptive title>
+
+Objective:
+- <concise description of the immediate objective>
+
+Steps:
+1. <step 1>
+2. <step 2>
+...
+
+Expected Outcome:
+- <list of conditions that must be true for this action to be successful>
+

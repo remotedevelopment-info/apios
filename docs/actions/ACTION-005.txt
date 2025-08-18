@@ -1,0 +1,31 @@
+Goal: Implement the user interaction daemon and basic dashboard.
+
+Instructions:
+- Python daemon that receives user input (CLI or WebSocket terminal) and routes it to the linguistic analysis daemon.
+- Return responses and object updates to the user.
+- Dashboard monitors running daemons via UNIX sockets, displays system status, and shows current nouns/adjectives/verbs.
+- Minimalistic dashboard (terminal-based UI using curses or textual frameworks).
+- Output full Python code and instructions for running both daemon and dashboard in Docker environment.
+
+Version: v0.1.005
+
+ACTION-005: Implement Verification Utilities
+
+Objective:
+- Provide command-line utilities to verify health and initialization of ApiOS components.
+
+Steps:
+1. Write scripts to check:
+   - MongoDB connectivity and collection existence.
+   - SQLite table existence.
+   - Object storage directories.
+   - Container health for apios, apios-mongo, apios-sqlite.
+2. Place scripts in steps/ (e.g., steps/a005-mongo-check.bash, steps/a005-sqlite-check.bash).
+3. Provide a wrapper script (steps/a005-verify-all.bash) to run all checks at once.
+4. Implement `--verbose` flag for detailed reporting.
+
+Expected Outcome:
+- Developers can run a single command to confirm ApiOS environment integrity.
+- Each subsystem reports healthy/unhealthy with clear output.
+- Failures indicate the exact missing/invalid component.
+

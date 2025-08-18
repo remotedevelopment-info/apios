@@ -1,28 +1,32 @@
-# Use Go base image (multi-arch: amd64, arm64)
+# Base image: Go + Debian slim
 FROM golang:1.20-bullseye
 
-# Install Python 3.11
+# Install Python, pip, SQLite, and other dependencies
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip python3-venv wget git build-essential curl && \
+    apt-get install -y \
+        python3 \
+        python3-pip \
+        python3-venv \
+        wget \
+        git \
+        build-essential \
+        sqlite3 \
+        libsqlite3-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
 RUN python3 -m pip install --upgrade pip
 
-# Install Python dependencies
+# Install Python packages
 RUN pip install --no-cache-dir pymongo fastapi uvicorn
 
-# Set environment variables
-ENV PATH="/usr/local/go/bin:${PATH}"
-ENV GOPATH="/go"
+# Install sqlite3 in the apios-sqlite container
+RUN apt-get update && apt-get install -y sqlite3
 
-# Create working directory
-WORKDIR /app
+# Set working directory
+WORKDIR /src
 
-# Copy source code and scripts
-COPY ./src /app/src
-COPY ./scripts /app/scripts
-
-# Default command
-CMD ["bash"]
+# Copy source and scripts
+COPY src /src
+COPY scripts /src/scripts
 

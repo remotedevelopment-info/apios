@@ -1,38 +1,47 @@
 services:
   apios:
-    build:
+    build: 
       context: .
       dockerfile: python-go/Dockerfile
     container_name: apios
     volumes:
-      - ./src:/app/src
-      - ./scripts:/app/scripts
+      - ./data:/data            # persistent volume for SQLite and other data
+      - ./src:/src              # source code
+      - ./scripts:/src/scripts  # scripts folder
+    depends_on:
+      - apios-mongo
+      - apios-sqlite
     networks:
       - apios-net
     tty: true
+    stdin_open: true
 
-  mongodb:
-    image: mongo:6.0
+  apios-mongo:
+    image: mongo:6
     container_name: apios-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db    # persistent MongoDB storage
+    networks:
+      - apios-net
     ports:
       - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - apios-net
 
-  sqlite:
-    image: nouchka/sqlite3
+  apios-sqlite:
+    image: alpine:latest
     container_name: apios-sqlite
+    command: tail -f /dev/null  # keep container alive for exec
     volumes:
-      - ./sqlite_data:/data
+      - ./data:/data            # mount same volume as main container
     networks:
       - apios-net
-
-networks:
-  apios-net:
+    tty: true
+    stdin_open: true
 
 volumes:
   mongo_data:
-  sqlite_data:
+
+networks:
+  apios-net:
+    driver: bridge
 

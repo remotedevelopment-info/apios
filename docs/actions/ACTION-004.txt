@@ -1,0 +1,31 @@
+Goal: Implement the library creation and evolution daemon.
+
+Instructions:
+- Python-based daemon that receives structured objects from the linguistic analysis daemon.
+- Create or update verbs, nouns, adjectives, and libraries.
+- Maintain semver for each object.
+- Store updates in MongoDB.
+- Run as a background service in Docker environment.
+- Use UNIX sockets to communicate with linguistic daemon and dashboard.
+- Include logging for library updates.
+- Output full Python code and instructions for running the daemon.
+
+Version: v0.1.004
+
+ACTION-004: Define Object Storage Structure
+
+Objective:
+- Establish the filesystem layout and conventions for storing ApiOS objects.
+
+Steps:
+1. Create a root data directory (e.g., ./data/objects).
+2. Define subdirectories by type (linguistic_objects, library_definitions, user_interactions).
+3. Ensure the directory structure is mounted into containers where needed.
+4. Provide a script (steps/a004.bash) to create the directories idempotently.
+5. Add a README.md inside ./data/objects describing the structure.
+
+Expected Outcome:
+- A consistent object storage directory hierarchy exists.
+- All required directories are mounted into relevant containers.
+- Documentation describes where to find and place object data.
+

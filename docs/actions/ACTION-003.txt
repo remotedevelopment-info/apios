@@ -1,0 +1,30 @@
+Goal: Implement a daemon for linguistic analysis.
+
+Instructions:
+- Python-based daemon that reads natural language input and parses it into noun/adjective/verb structures.
+- Use a queue or raw UNIX socket to receive input.
+- Output structured objects to the library evolution daemon.
+- Ensure it runs as a background service in the Docker environment.
+- Include logging for each analyzed phrase.
+- Output full Python code and instructions for running the daemon.
+
+Version: v0.1.003
+
+ACTION-003: Initialize SQLite Schema
+
+Objective:
+- Define and create the initial SQLite database schema for ApiOS.
+
+Steps:
+1. Verify the SQLite container/service (apios-sqlite) is running and has write access to /data.
+2. Create the following tables:
+   - linguistic_objects
+   - library_definitions
+   - user_interactions
+3. Ensure idempotency — script should not fail if tables already exist.
+4. Write initialization SQL into steps/a003.sql and a runner script in steps/a003.bash.
+
+Expected Outcome:
+- SQLite database contains the three tables with correct schema.
+- Initialization can be re-run without errors or duplication.
+

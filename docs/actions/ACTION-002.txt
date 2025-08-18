@@ -1,0 +1,38 @@
+Goal: Set up and validate the initial MongoDB schema for ApiOS.
+
+Instructions:
+- Ensure that the MongoDB service (apios-mongo) is running and reachable.
+- Create persistent collections required by ApiOS:
+  - linguistic_objects
+  - library_definitions
+  - user_interactions
+- Use minimal initialization logic (no heavy fixtures or data dumps).
+- Provide a repeatable script that can be re-run without duplicating collections.
+- Include validation commands to confirm the collections exist.
+- Keep dependencies minimal: use docker exec + mongo client or a simple initialization script.
+- Output goes into `steps/a002.bash` so it can be executed directly.
+- Provide verification commands that check collection presence inside MongoDB.
+
+
+ACTION-002: Initialize AI Agent Workspace
+
+Objective:
+- Create a dedicated workspace directory for AI agents.
+- Register the initial agent in MongoDB.
+
+Steps:
+1. Verify that the `agents` directory exists inside the container.
+   - Path: /workspace/agents
+   - Create if missing.
+
+2. Insert initial agent record into MongoDB.
+   - Collection: agents
+   - Database: apios_db
+   - Record: { "name": "Agent001", "role": "software_builder", "status": "initialized" }
+
+3. Confirm that the agent is present in the database.
+
+Expected Outcome:
+- The `agents` directory is present.
+- `Agent001` is registered in MongoDB with status "initialized".
+

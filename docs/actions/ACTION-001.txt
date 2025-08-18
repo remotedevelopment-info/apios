@@ -1,0 +1,38 @@
+Goal: Initialize the base ApiOS environment.
+
+Instructions: 
+- Set up a Docker environment capable of running Python, Go, MongoDB, and SQLite.
+- Provide Dockerfile(s) and docker-compose.yml with appropriate links between services.
+- Include persistent volumes for MongoDB and SQLite.
+- Ensure services can communicate via UNIX sockets.
+- Keep dependencies minimal.
+- Write clear instructions for starting and stopping the environment.
+- Include a mechanism to initialize MongoDB collections and SQLite tables.
+- Output the full code and configuration files.
+- **Generate the implementation scripts in the `steps/` folder** (e.g., steps/a001.bash or steps/a001.yml) containing actual executable commands derived from these instructions. These scripts should be runnable in the target environment to set up the ApiOS base environment.
+- Provide verification commands to ensure the databases and containers are correctly initialized.
+
+
+
+ACTION-001: Initialize Core Environment
+
+Objective:
+- Build the base Docker environment.
+- Ensure MongoDB and SQLite subsystems are running and accessible.
+
+Steps:
+1. Build and start containers for:
+   - API service (apios)
+   - MongoDB (apios-mongo)
+   - SQLite (apios-sqlite)
+
+2. Verify container health.
+   - Check that `apios-mongo` is reachable on port 27017.
+   - Check that `apios-sqlite` has access to /data directory.
+
+3. Initialize SQLite database schema.
+   - Tables: linguistic_objects, library_definitions, user_interactions.
+
+Expected Outcome:
+- All containers are running and healthy.
+- SQLite database initialized with required tables.
