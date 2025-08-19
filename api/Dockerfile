@@ -4,7 +4,7 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install dependencies
-RUN pip install --no-cache-dir fastapi uvicorn[standard]
+RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic passlib[bcrypt] python-jose[cryptography]
 
 # Copy application source
 COPY src /app/src

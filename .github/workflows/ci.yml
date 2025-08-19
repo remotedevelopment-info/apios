@@ -1,0 +1,49 @@
+name: ApiOS CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build apios services
+        run: |
+          docker compose build
+          docker build -t apios-api:latest -f api/Dockerfile .
+  verify:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start services
+        run: docker compose up -d
+      - name: Run steps 006-010
+        run: ./run-steps.bash --from 006 --to 010 --log quiet
+      - name: Run ACTION-011
+        run: ./run-steps.bash steps/a011.bash --log quiet
+      - name: Run ACTION-012
+        env:
+          JWT_SECRET: dev-secret-change-me
+        run: ./run-steps.bash steps/a012.bash --log quiet
+      - name: Run ACTION-013
+        env:
+          JWT_SECRET: dev-secret-change-me
+        run: ./run-steps.bash steps/a013.bash --log quiet
+      - name: Collect logs on failure
+        if: failure()
+        run: |
+          mkdir -p ci-logs
+          docker ps -a > ci-logs/ps.txt || true
+          docker logs apios > ci-logs/apios.log 2>&1 || true
+          docker logs apios-mongo > ci-logs/apios-mongo.log 2>&1 || true
+          docker logs apios-sqlite > ci-logs/apios-sqlite.log 2>&1 || true
+          ls -la ./data > ci-logs/data-ls.txt || true
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ci-logs
+          path: ci-logs
