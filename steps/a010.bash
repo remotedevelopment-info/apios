@@ -64,7 +64,7 @@ docker run -d --name "$NAME" --network apios-net -p ${PORT}:8000 -e JWT_SECRET="
 printf "Waiting for API to be ready"
 # Increased retries to 45 seconds and log container output on failure
 for i in {1..45}; do
-  if curl $CURL_FLAGS "http://localhost:${PORT}/objects" >/dev/null 2>&1; then echo ""; break; fi
+  if curl $CURL_FLAGS "http://localhost:${PORT}/health" >/dev/null 2>&1; then echo ""; break; fi
   printf "."; sleep 1
   if [[ $i -eq 45 ]]; then
     printf "\n[FAIL] API did not become ready\n"

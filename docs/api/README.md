@@ -45,4 +45,4 @@ Authentication: JWT (Bearer). Obtain via POST /users/login after registering.
 
 Notes:
 - JWT enforcement is active when env JWT_SECRET is provided to the API container.
-- SQLite DB path: /data/apios.db (mounted read-only in API container).
+- SQLite DB path: /data/apios.db (mounted read-write in API container to support WAL and write endpoints).

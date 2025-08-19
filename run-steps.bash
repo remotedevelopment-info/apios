@@ -131,5 +131,5 @@ for step in "${steps[@]}"; do
 done
 
 echo "=== All steps completed successfully ==="
-echo "Summary: OK=${ok_count} FAIL=${fail_count}"
+echo "Summary: TOTAL=${#steps[@]} OK=${ok_count} FAIL=${fail_count}"
 

@@ -8,6 +8,11 @@ import os
 
 app = FastAPI(title="ApiOS API", version="0.3.0")
 
+# Health endpoint
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
 # Models
 class ObjectCreate(BaseModel):
     name: str = Field(..., min_length=1)
