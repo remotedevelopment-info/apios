@@ -1,5 +1,6 @@
 # Ignore local SQLite database and other generated data
 /data/*.db
+/data/apios.db-*     # WAL/SHM files
 /data/*.sqlite
 /data/*.sqlite3
 
