@@ -8,7 +8,13 @@ FAIL=0
 
 echo "ACTION-007: Seeding database"
 
-# Insert reproducible seed data (idempotent via UNIQUE constraints and OR IGNORE)
+# Ensure schema is in canonical form (noun/adjectives/verbs/metadata)
+need_noun=$(docker exec apios sqlite3 "$DB" "SELECT 1 FROM pragma_table_info('linguistic_objects') WHERE name='noun' LIMIT 1;") || need_noun=""
+if [[ -z "$need_noun" ]]; then
+  echo "[FAIL] linguistic_objects schema not migrated (missing 'noun'). Run a006 first."; exit 1
+fi
+
+# Insert reproducible seed data (idempotent via UNIQUE and OR IGNORE)
 docker exec -i apios bash -lc "sqlite3 '$DB' <<'SQL'
 PRAGMA foreign_keys=ON;
 
@@ -19,7 +25,7 @@ INSERT OR IGNORE INTO users (username, email) VALUES ('testuser', 'test@example.
 INSERT OR IGNORE INTO projects (name, owner_id)
 SELECT 'Test Project', u.id FROM users u WHERE u.username='testuser';
 
--- Seed two linguistic objects (basic structure from initial schema)
+-- Seed two linguistic objects
 INSERT OR IGNORE INTO linguistic_objects (id, noun, adjectives, verbs, metadata) VALUES
   (1, 'alpha', 'quick,bright', 'run,leap', '{"source":"seed"}');
 INSERT OR IGNORE INTO linguistic_objects (id, noun, adjectives, verbs, metadata) VALUES

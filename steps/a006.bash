@@ -18,9 +18,42 @@ if ! docker exec apios bash -lc 'command -v sqlite3 >/dev/null 2>&1'; then
 # Ensure /data exists on host (bind mount)
 mkdir -p ./data
 
-# Apply migrations idempotently
+# --- MIGRATION: Normalize linguistic_objects schema to canonical columns ---
+# Target schema: id, noun, adjectives, verbs, metadata
+has_noun=$(docker exec apios sqlite3 "$DB" "SELECT 1 FROM pragma_table_info('linguistic_objects') WHERE name='noun' LIMIT 1;") || has_noun=""
+has_name=$(docker exec apios sqlite3 "$DB" "SELECT 1 FROM pragma_table_info('linguistic_objects') WHERE name='name' LIMIT 1;") || has_name=""
+if [[ -z "$has_noun" && -n "$has_name" ]]; then
+  echo "[INFO] Migrating linguistic_objects from (name,content) -> (noun,metadata)"
+  if docker exec -i apios bash -lc "sqlite3 '$DB' <<'SQL'
+PRAGMA foreign_keys=OFF;
+BEGIN;
+CREATE TABLE IF NOT EXISTS linguistic_objects_new (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  noun TEXT,
+  adjectives TEXT,
+  verbs TEXT,
+  metadata TEXT
+);
+INSERT INTO linguistic_objects_new (id, noun, metadata)
+SELECT id, name, content FROM linguistic_objects;
+DROP TABLE linguistic_objects;
+ALTER TABLE linguistic_objects_new RENAME TO linguistic_objects;
+COMMIT;
+PRAGMA foreign_keys=ON;
+SQL"; then
+    echo "[OK] linguistic_objects migrated"
+  else
+    echo "[FAIL] Failed to migrate linguistic_objects"; FAIL=1
+  fi
+else
+  [[ -n "$has_noun" ]] && echo "[OK] linguistic_objects already in canonical schema" || echo "[INFO] No migration needed"
+fi
+
+# Apply migrations for new core tables idempotently
 if docker exec -i apios bash -lc "sqlite3 '$DB' <<'SQL'
 PRAGMA foreign_keys=ON;
+PRAGMA journal_mode=WAL;
+PRAGMA synchronous=NORMAL;
 
 -- users
 CREATE TABLE IF NOT EXISTS users (
@@ -60,10 +93,18 @@ CREATE TABLE IF NOT EXISTS relations (
   FOREIGN KEY (object_id) REFERENCES linguistic_objects(id) ON DELETE CASCADE
 );
 
+-- clean duplicates in relations before creating unique index
+DELETE FROM relations
+WHERE rowid NOT IN (
+  SELECT MIN(rowid) FROM relations GROUP BY subject_id, predicate, object_id
+);
+
 -- helpful indexes
+CREATE INDEX IF NOT EXISTS idx_projects_owner_id ON projects(owner_id);
 CREATE INDEX IF NOT EXISTS idx_metadata_object_id ON metadata(object_id);
 CREATE INDEX IF NOT EXISTS idx_relations_subject ON relations(subject_id);
 CREATE INDEX IF NOT EXISTS idx_relations_object ON relations(object_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_relations_unique ON relations(subject_id, predicate, object_id);
 SQL"; then
   echo "[OK] Migrations applied"
 else
@@ -81,6 +122,7 @@ else
 fi
 
 if [[ "$VERBOSE" == true ]]; then
+  echo "--- .schema linguistic_objects ---"; docker exec apios sqlite3 "$DB" ".schema linguistic_objects" || true
   echo "--- .schema users ---"; docker exec apios sqlite3 "$DB" ".schema users" || true
   echo "--- .schema projects ---"; docker exec apios sqlite3 "$DB" ".schema projects" || true
   echo "--- .schema metadata ---"; docker exec apios sqlite3 "$DB" ".schema metadata" || true

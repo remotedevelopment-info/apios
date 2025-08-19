@@ -11,6 +11,12 @@ DB_MOUNT="$(pwd)/data:/data:ro"
 echo "Building API image"
 docker build -t "$IMAGE" -f api/Dockerfile .
 
+# Ensure network exists (align with docker-compose network)
+if ! docker network inspect apios-net >/dev/null 2>&1; then
+  echo "Creating network apios-net"
+  docker network create apios-net >/dev/null
+fi
+
 # Restart container idempotently
 if [ "$(docker ps -aq -f name=^${NAME}$)" ]; then
   docker rm -f "$NAME" >/dev/null 2>&1 || true
