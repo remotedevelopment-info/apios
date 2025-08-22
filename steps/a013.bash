@@ -33,8 +33,11 @@ if ! curl -fsS "http://localhost:${PORT}/objects" >/dev/null 2>&1; then
   sleep 1
 fi
 
-# Register/login (idempotent)
-reg_payload='{"username":"u013","password":"p013","email":"u013@example.com"}'
+# Register/login (idempotent with password fallback)
+USER="u013"
+NEW_PW="password013"
+OLD_PW="p013"
+reg_payload=$(printf '{"username":"%s","password":"%s","email":"%s@example.com"}' "$USER" "$NEW_PW" "$USER")
 reg_resp=$(curl -sS -H 'Content-Type: application/json' -d "$reg_payload" "http://localhost:${PORT}/users/register") || reg_resp=""
 if echo "$reg_resp" | grep -q '"id"' && echo "$reg_resp" | grep -q '"username"'; then
   say "[OK] register succeeded"
@@ -42,15 +45,20 @@ elif echo "$reg_resp" | grep -qi 'already exists'; then
   say "[OK] user already exists"
 else
   say "[WARN] register response unexpected: $reg_resp"; fi
-login_payload='{"username":"u013","password":"p013"}'
+login_payload=$(printf '{"username":"%s","password":"%s"}' "$USER" "$NEW_PW")
 login_resp=$(curl -sS -H 'Content-Type: application/json' -d "$login_payload" "http://localhost:${PORT}/users/login") || login_resp=""
-# BSD/macOS compatible token extraction
-token=$(printf '%s' "$login_resp" | grep -Eo '"access_token"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n1 | sed -E 's/.*"access_token"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/')
+# Robust token extraction compatible with BSD sed
+token=$(printf '%s' "$login_resp" | sed -nE 's/.*"access_token"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p' | head -n1)
+if [[ -z "$token" ]]; then
+  login_payload=$(printf '{"username":"%s","password":"%s"}' "$USER" "$OLD_PW")
+  login_resp=$(curl -sS -H 'Content-Type: application/json' -d "$login_payload" "http://localhost:${PORT}/users/login") || login_resp=""
+  token=$(printf '%s' "$login_resp" | sed -nE 's/.*"access_token"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p' | head -n1)
+fi
 [[ -n "$token" ]] || { say "[FAIL] login failed"; exit 1; }
 
 # Ensure a project exists
 proj_name="Project-013"
-owner_id=$(docker exec apios sqlite3 "$DB" "SELECT id FROM users WHERE username='u013' LIMIT 1;")
+owner_id=$(docker exec apios sqlite3 "$DB" "SELECT id FROM users WHERE username='$USER' LIMIT 1;")
 if [[ -z "$owner_id" ]]; then say "[FAIL] owner not found"; exit 1; fi
 proj_id=$(docker exec apios sqlite3 "$DB" "SELECT id FROM projects WHERE name='$proj_name' LIMIT 1;")
 if [[ -z "$proj_id" ]]; then

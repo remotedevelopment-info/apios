@@ -46,8 +46,13 @@ for i in {1..30}; do
   sleep 0.5
 done
 
-# Register user
-reg_payload='{"username":"u012","password":"p012","email":"u012@example.com"}'
+# Credentials
+USER="u012"
+NEW_PW="password012"
+OLD_PW="p012"
+
+# Register user (idempotent)
+reg_payload=$(printf '{"username":"%s","password":"%s","email":"%s@example.com"}' "$USER" "$NEW_PW" "$USER")
 log_debug "Register payload: $reg_payload"
 reg_resp=$(curl -sS -H 'Content-Type: application/json' -d "$reg_payload" "http://localhost:${PORT}/users/register") || reg_resp=""
 log_debug "Register response: $reg_resp"
@@ -59,13 +64,21 @@ else
   say "[FAIL] register failed"; FAIL=1
 fi
 
-# Login
-login_payload='{"username":"u012","password":"p012"}'
+# Login (try new password, then fallback to old for idempotency)
+login_payload=$(printf '{"username":"%s","password":"%s"}' "$USER" "$NEW_PW")
 log_debug "Login payload: $login_payload"
 login_resp=$(curl -sS -H 'Content-Type: application/json' -d "$login_payload" "http://localhost:${PORT}/users/login") || login_resp=""
 log_debug "Login response: $login_resp"
-# Portable token extract (BSD/macOS compatible)
-token=$(printf '%s' "$login_resp" | grep -Eo '"access_token"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n1 | sed -E 's/.*"access_token"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/')
+# Robust token extract (BSD/macOS compatible, non-failing)
+token=$(printf '%s' "$login_resp" | sed -nE 's/.*"access_token"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p' | head -n1)
+if [[ -z "$token" ]]; then
+  # Try old password
+  login_payload=$(printf '{"username":"%s","password":"%s"}' "$USER" "$OLD_PW")
+  log_debug "Login fallback payload: $login_payload"
+  login_resp=$(curl -sS -H 'Content-Type: application/json' -d "$login_payload" "http://localhost:${PORT}/users/login") || login_resp=""
+  log_debug "Login fallback response: $login_resp"
+  token=$(printf '%s' "$login_resp" | sed -nE 's/.*"access_token"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/p' | head -n1)
+fi
 if [[ -n "$token" ]]; then
   say "[OK] login succeeded"
 else

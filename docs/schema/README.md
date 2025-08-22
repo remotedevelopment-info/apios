@@ -45,6 +45,18 @@ Existing table (from earlier actions):
   - metadata TEXT
   - project_id INTEGER (nullable) (ACTION-011)
 
+## Backend switching
+
+By default, ApiOS uses SQLite at `/data/apios.db`. You can switch the DB backend via env `DB_BACKEND` (sqlite|postgres). Postgres is currently a stub and not yet implemented.
+
+## Migrations
+
+A table `migrations(version TEXT PRIMARY KEY)` records applied versions. Steps backfill versions `001`–`015`; new actions append their versions so `/ready` can assert readiness.
+
+## Backup policy
+
+Create snapshots of `/data/apios.db` and associated WAL/SHM files before upgrades. See step `a027.bash` for a local snapshot script.
+
 Notes:
 - Foreign keys are enforced per-connection via `PRAGMA foreign_keys=ON;` in code.
 - WAL mode and `synchronous=NORMAL` configured for better read concurrency.

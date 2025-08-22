@@ -17,7 +17,7 @@ def verify_password(password: str, hashed: str) -> bool:
     return pwd_context.verify(password, hashed)
 
 def create_access_token(sub: str, expires_minutes: Optional[int] = None) -> str:
-    expire = dt.datetime.utcnow() + dt.timedelta(minutes=expires_minutes or ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=expires_minutes or ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode = {"sub": sub, "exp": expire}
     return jwt.encode(to_encode, JWT_SECRET, algorithm=ALGO)
 
